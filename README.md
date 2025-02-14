@@ -73,7 +73,7 @@ Bringing machine 'ansible' up with 'virtualbox' provider...
 ## 2.2 Подключился к ВМ ansible, извлек из архива проект ДЗ и запустил Playbook pxe.yml    
 
 ```shell
-root@ansible:/home/vagrant/ansible# ansible-playbook pxe.yml
+root@ansible:/home/vagrant/ansible# ansible-playbook pxe.yml   
 [WARNING]: Found both group and host with same name: pxeserver
 
 PLAY [pxeserver] **********************************************************************************************
