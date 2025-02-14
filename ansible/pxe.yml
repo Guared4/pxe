@@ -1,0 +1,4 @@
+- hosts: pxeserver
+  become: yes
+  roles:
+    - pxeserver
