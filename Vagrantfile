@@ -42,22 +42,22 @@ Vagrant.configure("2") do |config|
 end
 
 # Разворачивание дополнительной машины для Ansible при работе в среде Windows+Vagrant
-Vagrant.configure("2") do |config|
-  config.vm.define "ansible" do |ansible|
-    ansible.vm.box = "bento/ubuntu-22.04"
-    ansible.vm.network "private_network", ip: "192.168.57.100"
-    ansible.vm.hostname = "ansible"
-    ansible.vm.provider "virtualbox" do |vb|
-      vb.memory = "1024"
-      vb.cpus = "1"
-    end
+#Vagrant.configure("2") do |config|
+#  config.vm.define "ansible" do |ansible|
+#    ansible.vm.box = "bento/ubuntu-22.04"
+#    ansible.vm.network "private_network", ip: "192.168.57.100"
+#    ansible.vm.hostname = "ansible"
+#    ansible.vm.provider "virtualbox" do |vb|
+#      vb.memory = "1024"
+#      vb.cpus = "1"
+#    end
 
     # Установка Ansible внутри виртуальной машины и копирование публичного ключа
-    ansible.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y unrar
-      sudo apt-get install -y ansible
-    SHELL
+    #ansible.vm.provision "shell", inline: <<-SHELL
+    #  sudo apt-get update
+    #  sudo apt-get install -y unrar
+    #  sudo apt-get install -y ansible
+    #SHELL
 
     #file_to_copy = "./id_rsa/id_rsa"
     #ansible.vm.provision "file", source: file_to_copy, destination: "/home/vagrant/.ssh/id_rsa"
@@ -77,5 +77,5 @@ Vagrant.configure("2") do |config|
     
     #file_to_copy = "./ansible.rar"
     #ansible.vm.provision "file", source: file_to_copy, destination: "/home/vagrant/ansible.rar"
-  end
-end
+  #end
+#end
