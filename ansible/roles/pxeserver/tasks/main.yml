@@ -1,0 +1,96 @@
+---
+- name: Отключение firewall
+  systemd:
+    name: ufw
+    state: stopped
+    enabled: false
+
+- name: Установка необходимых пакетов
+  apt:
+    name:
+      - dnsmasq
+      - apache2
+    state: present
+    update_cache: true
+
+- name: Создание каталогов для TFTP и ISO
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  with_items:
+    - /srv/tftp/amd64
+    - /srv/images
+    - /srv/ks
+
+- name: Загрузка и распаковка netboot-образа
+  block:
+    - name: Скачивание netboot-образа
+      get_url:
+        url: https://mirror.yandex.ru/ubuntu-releases/24.04/ubuntu-24.04.1-netboot-amd64.tar.gz
+        dest: /tmp/ubuntu-24.04.1-netboot-amd64.tar.gz
+        mode: '0644'
+
+    - name: Распаковка netboot-образа
+      unarchive:
+        src: /tmp/ubuntu-24.04.1-netboot-amd64.tar.gz
+        dest: /srv/tftp
+        remote_src: yes
+
+    - name: Проверка наличия образа ОС
+      stat:
+        path: /srv/images/ubuntu-24.04-live-server-amd64.iso
+      register: iso_file  # Результат сохраняется в переменную iso_file
+
+    - name: Загрузка образа ОС (если отсутствует)
+      get_url:
+        url: https://mirror.yandex.ru/ubuntu-releases/24.04/ubuntu-24.04.1-live-server-amd64.iso
+        dest: /srv/images/ubuntu-24.04-live-server-amd64.iso
+        mode: '0644'
+      when: not iso_file.stat.exists
+
+- name: Настройка dnsmasq
+  template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.d/pxe.conf
+    mode: '0644'
+
+- name: Перезапуск dnsmasq
+  service:
+    name: dnsmasq
+    state: restarted
+
+- name: Настройка Apache
+  template:
+    src: ks-server.conf.j2
+    dest: /etc/apache2/sites-available/ks-server.conf
+    mode: '0644'
+
+- name: Активация конфигурации Apache
+  command: a2ensite ks-server.conf
+
+- name: Перезапуск Apache
+  service:
+    name: apache2
+    state: restarted
+    enabled: true
+
+- name: Настройка файла user-data
+  template:
+    src: user-data.j2
+    dest: /srv/ks/user-data
+    mode: '0644'
+
+- name: Создание файла meta-data
+  copy:
+    content: ""
+    dest: /srv/ks/meta-data
+    mode: '0644'
+
+- name: Настройка PXE-конфигурации
+  template:
+    src: pxelinux.cfg.j2
+    dest: /srv/tftp/amd64/pxelinux.cfg/default
+    mode: '0644'
